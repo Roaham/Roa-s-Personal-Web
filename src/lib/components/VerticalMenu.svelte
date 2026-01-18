@@ -1,6 +1,6 @@
 <script>
   import { onMount } from "svelte";
-  import { botones, index, menuVisible, exiting, handleMenuKey } from "$lib/stores/menu";
+  import { botones, index, menuVisible, exiting, entering, handleMenuKey } from "$lib/stores/menu";
   import { goto } from "$app/navigation";
 
   const ITEM_HEIGHT = 80;
@@ -10,29 +10,50 @@
     return () => window.removeEventListener("keydown", handleMenuKey);
   });
 
-  function handleTransitionEnd() {
-    if ($exiting) {
-      const selected = $index;
-      menuVisible.set(false);
-      exiting.set(false);
+    function handleTransitionEnd(e) {
+    if (e.target !== e.currentTarget) return;
 
-      switch (selected) {
-        case 0: goto("/"); break;
-        case 1: goto("/proyectos"); break;
-        case 2: goto("/acerca"); break;
-        case 3: goto("/contacto"); break;
-      }
+    if ($exiting) {
+        const selected = $index;
+        menuVisible.set(false);
+        exiting.set(false);
+
+        requestAnimationFrame(() => {
+        switch (selected) {
+            case 0: goto("/"); break;
+            case 1: goto("/proyects"); break;
+            case 2: goto("/acerca"); break;
+            case 3: goto("/contacto"); break;
+        }
+        });
     }
-  }
+    }
 </script>
 
-{#if $menuVisible}
-<nav class="menu-wrapper">
+<nav class="menu-wrapper" class:hidden={!$menuVisible}>
     <div
         class="menu"
         class:exiting={$exiting}
+        class:entering={$entering}
         style="--offset: ${-($index ?? 0) * ITEM_HEIGHT}px"
-        on:transitionend={handleTransitionEnd}
+        on:transitionend={(e) => {
+            if (e.target !== e.currentTarget) return;
+
+            if ($exiting) {
+            const selected = $index;
+            exiting.set(false);
+            menuVisible.set(false);
+
+            requestAnimationFrame(() => {
+                switch (selected) {
+                case 0: goto("/"); break;
+                case 1: goto("/proyectS"); break;
+                case 2: goto("/acerca"); break;
+                case 3: goto("/contacto"); break;
+                }
+            });
+            }
+        }}
     >
         {#each botones as btn, i}
         <button
@@ -47,7 +68,6 @@
         {/each}
     </div>
 </nav>
-{/if}
 
 <style>
     .menu-wrapper {
@@ -57,7 +77,6 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        overflow: hidden;
     }
 
     .menu {
@@ -70,9 +89,19 @@
     }
 
     .menu.exiting {
-        transform: translate(400px, -300px) rotate(20deg) scale(0.3);
+        transform: translateY(-120vh);
         opacity: 0;
-        transition: transform 0.8s ease-in, opacity 0.8s ease-in;
+        transition:
+            transform 0.35s cubic-bezier(0.4, 0, 1, 1),
+            opacity 0.2s linear;
+    }
+
+    .menu.entering {
+        transform: translateY(-120vh);
+        opacity: 0;
+        transition:
+            transform 0.35s cubic-bezier(0.4, 0, 1, 1),
+            opacity 0.2s linear;
     }
 
     .btn {

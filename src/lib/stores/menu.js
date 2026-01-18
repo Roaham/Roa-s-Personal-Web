@@ -2,8 +2,10 @@ import { writable } from "svelte/store";
 
 export const botones = ["INICIO", "PROYECTOS", "ACERCA", "CONTACTO"];
 export const index = writable(0);
+
 export const menuVisible = writable(true);
 export const exiting = writable(false);
+export const entering = writable(false);
 
 export function handleMenuKey(e) {
   if (["ArrowUp", "ArrowDown", "Enter", "Escape"].includes(e.key)) {
@@ -16,7 +18,14 @@ export function handleMenuKey(e) {
   }
 
   if (e.key === "Escape") {
-    menuVisible.set(true);
+    menuVisible.update((v) => {
+      if (v) return v;
+
+      entering.set(true);
+      requestAnimationFrame(() => entering.set(false));
+      return true;
+    });
+
     exiting.set(false);
     return;
   }
