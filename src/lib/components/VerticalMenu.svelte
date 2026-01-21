@@ -1,32 +1,58 @@
 <script>
-  import { onMount } from "svelte";
-  import { botones, index, menuVisible, exiting, entering, handleMenuKey } from "$lib/stores/menu";
-  import { goto } from "$app/navigation";
+    import { onMount, onDestroy } from "svelte";
+    import { browser } from "$app/environment";
+    import { botones, index, menuVisible, exiting, entering, handleMenuKey } from "$lib/stores/menu";
+    import { goto } from "$app/navigation";
 
-  const ITEM_HEIGHT = 80;
+    const ITEM_HEIGHT = 90;
 
-  onMount(() => {
-    window.addEventListener("keydown", handleMenuKey);
-    return () => window.removeEventListener("keydown", handleMenuKey);
-  });
+    let bounce = false;
+    let _bounceTimeout;
+
+    // Manual subscriptions should be guarded or handled via reactive statements
+    const unsubscribe = index.subscribe((v) => {
+        if (!browser) return;
+        bounce = true;
+        clearTimeout(_bounceTimeout);
+        _bounceTimeout = setTimeout(() => (bounce = false), 420);
+    });
+
+    onMount(() => {
+        // This ONLY runs in the browser
+        window.addEventListener("keydown", handleMenuKey);
+        
+        // Clean up inside onMount is safer
+        return () => {
+            window.removeEventListener("keydown", handleMenuKey);
+        };
+    });
+
+    onDestroy(() => {
+        unsubscribe();
+        if (browser) {
+            clearTimeout(_bounceTimeout);
+        }
+    });
 
     function handleTransitionEnd(e) {
-    if (e.target !== e.currentTarget) return;
+        if (e.target !== e.currentTarget) return;
 
-    if ($exiting) {
-        const selected = $index;
-        menuVisible.set(false);
-        exiting.set(false);
+        if ($exiting) {
+            const selected = $index;
+            menuVisible.set(false);
+            exiting.set(false);
 
-        requestAnimationFrame(() => {
-        switch (selected) {
-            case 0: goto("/"); break;
-            case 1: goto("/proyects"); break;
-            case 2: goto("/acerca"); break;
-            case 3: goto("/contacto"); break;
+            if (browser) {
+                requestAnimationFrame(() => {
+                    switch (selected) {
+                        case 0: goto("/home"); break;
+                        case 1: goto("/proyectos"); break;
+                        case 2: goto("/games"); break;
+                        case 3: goto("/redes"); break;
+                    }
+                });
+            }
         }
-        });
-    }
     }
 </script>
 
@@ -36,24 +62,7 @@
         class:exiting={$exiting}
         class:entering={$entering}
         style="--offset: ${-($index ?? 0) * ITEM_HEIGHT}px"
-        on:transitionend={(e) => {
-            if (e.target !== e.currentTarget) return;
-
-            if ($exiting) {
-            const selected = $index;
-            exiting.set(false);
-            menuVisible.set(false);
-
-            requestAnimationFrame(() => {
-                switch (selected) {
-                case 0: goto("/"); break;
-                case 1: goto("/proyectS"); break;
-                case 2: goto("/acerca"); break;
-                case 3: goto("/contacto"); break;
-                }
-            });
-            }
-        }}
+        on:transitionend={handleTransitionEnd}
     >
         {#each botones as btn, i}
         <button
@@ -62,6 +71,8 @@
             class:side={i !== $index}
             class:exiting={$exiting}
             style="--btn-index: {i}"
+            on:mouseenter={() => index.set(i)}
+            on:focus={() => index.set(i)}
         >
             {btn}
         </button>
@@ -143,5 +154,40 @@
         transform: translate(calc(200px - var(--btn-index)*50px), -300px) rotate(15deg) scale(0.3);
         opacity: 0;
         transition: transform 0.8s ease-in, opacity 0.8s ease-in;
+    }
+
+    .btn {
+        all: unset;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        min-width: 360px;
+        height: 68px;
+        margin: 14px 0;
+        padding: 10px 40px;
+        font-size: 1.9rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: #dfefff;
+        text-transform: uppercase;
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.12));
+        border-radius: 10px;
+        cursor: pointer;
+        transition: transform 0.35s ease, opacity 0.35s ease, filter 0.35s ease, box-shadow 0.35s ease;
+        box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
+    }
+
+    .btn.center {
+        transform: scale(1.28);
+        background: linear-gradient(180deg, #ffffff, #dfefff);
+        color: #001018;
+        box-shadow: 0 0 30px rgba(76,139,245,0.45), inset 0 -4px 12px rgba(0,0,0,0.25);
+        border-left: 8px solid #3aa0ff;
+    }
+
+    .btn.side {
+        transform: scale(0.86);
+        opacity: 0.22;
+        filter: blur(1.4px);
     }
 </style>

@@ -1,6 +1,6 @@
-import { writable } from "svelte/store";
+import { writable, get } from "svelte/store";
 
-export const botones = ["INICIO", "PROYECTOS", "ACERCA", "CONTACTO"];
+export const botones = ["HOME", "PROYECTOS", "GAMES", "REDES"];
 export const index = writable(0);
 
 export const menuVisible = writable(true);
@@ -13,20 +13,27 @@ export function handleMenuKey(e) {
   }
 
   if (e.key === "Enter") {
-    exiting.set(true);
+    if (get(menuVisible)) {
+      exiting.set(true);
+    }
     return;
   }
 
   if (e.key === "Escape") {
+    // Toggle menu: if open -> close, if closed -> open with entering animation
     menuVisible.update((v) => {
-      if (v) return v;
-
-      entering.set(true);
-      requestAnimationFrame(() => entering.set(false));
-      return true;
+      if (v) {
+        // close
+        exiting.set(false);
+        return false;
+      } else {
+        // open with entering animation
+        entering.set(true);
+        requestAnimationFrame(() => entering.set(false));
+        return true;
+      }
     });
 
-    exiting.set(false);
     return;
   }
 

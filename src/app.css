@@ -1,8 +1,41 @@
+@font-face {
+    font-family: 'LoveTW';
+    src: url('/LoveTW/Lovelt__.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Narrowband';
+    src: url('/Narrowband/Narrowband.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+:root{
+  --bg:#05060a;
+  --surface:rgba(255,255,255,0.02);
+  --text:#e9f2ff;
+  --muted:#9fb6d8;
+  --accent:#2b6cff;
+  --display: 'LoveTW', serif;
+  --ui: 'Narrowband', sans-serif;
+}
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  background: black;
-  overflow: hidden;
-  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: radial-gradient(1200px 600px at 12% 12%, rgba(43,108,255,0.06), transparent), var(--bg);
+  color:var(--text);
+  font-family:var(--ui);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
+
+/* layout helpers */
+main{min-height:100vh}
+
+/* utility */
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
