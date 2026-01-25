@@ -1,18 +1,16 @@
 <script>
-    import { goto } from '$app/navigation';
-    import { menuVisible } from '$lib/stores/menu';
-    import '../app.css';
-    import favicon from '$lib/assets/favicon.svg';
+	import { goto } from '$app/navigation';
+	import { menuVisible } from '$lib/stores/menu';
+	import '$lib/styles/global.css';
+	import favicon from '$lib/assets/favicon.svg';
 
-    let { children } = $props();
-
-    function handleGlobalKey(e) {
-        if (e.key === 'Escape') {
-            e.preventDefault();
-            menuVisible.set(true);
-            goto('/');
-        }
-    }
+	function handleGlobalKey(e) {
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			menuVisible.set(true);
+			goto('/');
+		}
+	}
 </script>
 
 <svelte:window onkeydown={handleGlobalKey} />
@@ -29,7 +27,7 @@
 	<div class="bg-overlay"></div>
 
 	<div class="content">
-		{@render children()}
+		<slot />
 	</div>
 </main>
 

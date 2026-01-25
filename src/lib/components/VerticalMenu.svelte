@@ -61,7 +61,7 @@
         class="menu"
         class:exiting={$exiting}
         class:entering={$entering}
-        style="--offset: ${-($index ?? 0) * ITEM_HEIGHT}px"
+        style="--offset: {-($index ?? 0) * ITEM_HEIGHT}px"
         on:transitionend={handleTransitionEnd}
     >
         {#each botones as btn, i}
